@@ -1,0 +1,36 @@
+{
+  "name": "hand-gesture-control-electron",
+  "version": "1.0.0",
+  "description": "Hand Gesture Control Desktop App",
+  "main": "main.js",
+  "build": {
+    "appId": "com.gesturecontrol.app",
+    "productName": "Hand Gesture Control",
+    "files": [
+      "../src/**/*",
+      "../dist/**/*",
+      "main.js",
+      "preload.js",
+      "../models/**/*"
+    ],
+    "directories": {
+      "output": "../build"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "../assets/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "../assets/icon.icns",
+      "category": "public.app-category.utilities"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "../assets/icon.png",
+      "category": "Utility"
+    },
+    "asar": true,
+    "compression": "maximum"
+  }
+}

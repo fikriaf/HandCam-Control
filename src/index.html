@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand Gesture Control System</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Hand Gesture Control</h1>
+            <div class="status-bar">
+                <span id="status-indicator" class="status idle">System Idle</span>
+                <span id="fps-counter" class="fps">FPS: 0</span>
+            </div>
+        </header>
+
+        <main>
+            <div class="video-container">
+                <video id="webcam" autoplay playsinline></video>
+                <canvas id="canvas-overlay"></canvas>
+            </div>
+
+            <div class="controls">
+                <button id="btn-camera" class="btn">Start Camera</button>
+                <button id="btn-visualization" class="btn">Toggle Visualization</button>
+                <select id="gesture-preset" class="select">
+                    <option value="all">All Gestures</option>
+                    <option value="navigation">Navigation Only</option>
+                    <option value="control">Control Only</option>
+                </select>
+            </div>
+
+            <div class="gesture-log">
+                <h3>Gesture Log</h3>
+                <div id="log-container"></div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
