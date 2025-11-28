@@ -273,11 +273,15 @@ export class VisualizationRenderer {
       handsData.forEach(handData => {
         const { landmarks, handedness } = handData;
         
-        // Draw connections first (behind landmarks)
-        this.drawConnections(landmarks);
+        // Draw connections first (behind landmarks) - only if enabled
+        if (this.config.showConnections) {
+          this.drawConnections(landmarks);
+        }
         
-        // Draw bounding box
-        this.drawBoundingBox(landmarks);
+        // Draw bounding box - only if enabled
+        if (this.config.showBoundingBox) {
+          this.drawBoundingBox(landmarks);
+        }
         
         // Draw landmarks on top
         this.drawLandmarks(landmarks, handedness);

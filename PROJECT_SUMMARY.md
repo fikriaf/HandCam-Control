@@ -119,18 +119,25 @@ Total: 40+ files created
 npm install
 ```
 
-### 2. Run Development Server
+### 2. Run Application
+
+**Web Mode (Recommended for Development)**:
 ```bash
 npm start
 ```
-
-### 3. Open Browser
 Buka http://localhost:8080
 
-### 4. Test Gestures
+**Electron Mode (Desktop App)**:
+```bash
+npm run electron  # Builds automatically
+```
+
+### 3. Test Gestures
 - Klik "Start Camera"
 - Izinkan akses webcam
 - Coba gesture-gesture yang tersedia
+
+**⚠️ Important**: Electron HARUS di-build dulu! Gunakan `npm run electron` (bukan `electron electron/main.js`)
 
 ## 🎯 Gesture yang Didukung
 

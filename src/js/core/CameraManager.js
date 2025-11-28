@@ -30,16 +30,33 @@ export class CameraManager {
    * @returns {Promise<MediaStream>}
    */
   async startStream() {
+    console.log('🎥 CameraManager: Starting stream...');
+    console.log('Config:', this.config);
+    
     if (!this.isInitialized) {
+      console.log('Initializing camera manager...');
       await this.initialize();
     }
 
     // Check if getUserMedia is supported
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      throw new Error('getUserMedia is not supported in this browser');
+      const error = 'getUserMedia is not supported in this browser. Use Chrome 90+, Firefox 88+, or Edge 90+.';
+      console.error('❌', error);
+      throw new Error(error);
     }
 
+    console.log('✅ getUserMedia is supported');
+
     try {
+      // List available cameras
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const cameras = devices.filter(d => d.kind === 'videoinput');
+      console.log(`Found ${cameras.length} camera(s):`, cameras.map(c => c.label || 'Unknown'));
+
+      if (cameras.length === 0) {
+        throw new Error('No camera devices found. Please connect a camera.');
+      }
+
       // Request camera access with constraints
       const constraints = {
         video: {
@@ -51,35 +68,63 @@ export class CameraManager {
         audio: false
       };
 
+      console.log('Requesting camera with constraints:', constraints);
       this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log('✅ Camera stream obtained:', this.stream);
       
       // Attach stream to video element
       this.videoElement.srcObject = this.stream;
+      console.log('✅ Stream attached to video element');
       
       // Wait for video to be ready
       await new Promise((resolve, reject) => {
         this.videoElement.onloadedmetadata = () => {
+          console.log('✅ Video metadata loaded');
           this.videoElement.play()
-            .then(resolve)
-            .catch(reject);
+            .then(() => {
+              console.log('✅ Video playing');
+              resolve();
+            })
+            .catch(err => {
+              console.error('❌ Video play error:', err);
+              reject(err);
+            });
         };
         
-        // Timeout after 5 seconds
-        setTimeout(() => reject(new Error('Video load timeout')), 5000);
+        // Timeout after 10 seconds
+        setTimeout(() => {
+          console.error('❌ Video load timeout');
+          reject(new Error('Video load timeout after 10 seconds'));
+        }, 10000);
       });
 
+      console.log('✅ Camera started successfully!');
       return this.stream;
       
     } catch (error) {
+      console.error('❌ Camera error:', error);
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      
       // Handle specific error types
       if (error.name === 'NotAllowedError') {
-        throw new Error('Camera permission denied by user');
+        const msg = 'Camera permission denied. Please allow camera access in browser settings.';
+        console.error('❌', msg);
+        throw new Error(msg);
       } else if (error.name === 'NotFoundError') {
-        throw new Error('No camera device found');
+        const msg = 'No camera found. Please connect a camera or check if it\'s enabled.';
+        console.error('❌', msg);
+        throw new Error(msg);
       } else if (error.name === 'NotReadableError') {
-        throw new Error('Camera is already in use by another application');
+        const msg = 'Camera is in use by another application. Please close other apps using the camera.';
+        console.error('❌', msg);
+        throw new Error(msg);
+      } else if (error.name === 'OverconstrainedError') {
+        const msg = 'Camera does not support requested resolution. Try lower resolution.';
+        console.error('❌', msg);
+        throw new Error(msg);
       } else {
-        throw new Error(`Camera access error: ${error.message}`);
+        throw new Error(`Camera error: ${error.message}`);
       }
     }
   }

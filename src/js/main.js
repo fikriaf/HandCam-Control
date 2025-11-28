@@ -15,15 +15,24 @@ import { VisualizationRenderer } from './ui/VisualizationRenderer.js';
 import { UIController } from './ui/UIController.js';
 import { gestureConfig, validateConfig } from './config/gestureConfig.js';
 import { systemConfig, validateSystemConfig } from './config/systemConfig.js';
+import { getOptimizedConfig, isElectron } from './config/electronConfig.js';
 
 class HandGestureControlApp {
   constructor() {
     this.initialized = false;
     this.running = false;
     
-    // Configuration
+    // Configuration - use optimized config for Electron
     this.gestureConfig = validateConfig();
-    this.systemConfig = validateSystemConfig();
+    const electronConfig = getOptimizedConfig();
+    this.systemConfig = validateSystemConfig(electronConfig || {});
+    
+    // Log environment
+    if (isElectron()) {
+      console.log('🖥️ Running in Electron with optimized settings');
+      console.log('Resolution:', this.systemConfig.camera.resolution);
+      console.log('Max Hands:', this.systemConfig.mediapipe.maxNumHands);
+    }
     
     // Core components
     this.eventBus = null;

@@ -36,11 +36,17 @@ Open your browser to `http://localhost:8080`
 
 ### Electron Desktop Mode
 
-Run the Electron app:
+**Important**: Electron requires build first!
 
 ```bash
+# Build and run Electron (recommended)
 npm run electron
+
+# Or development mode
+npm run electron:dev
 ```
+
+See [ELECTRON_GUIDE.md](ELECTRON_GUIDE.md) for detailed instructions.
 
 ### Production Build
 
@@ -147,10 +153,13 @@ export function onSwipeLeft(data) {
 - Check browser settings to allow camera access
 - Ensure no other application is using the camera
 
-### Low FPS / Performance Issues
+### Low FPS / Performance Issues (Especially Electron)
+- **Enable GPU**: Comment out `app.disableHardwareAcceleration()` in `electron/main.js`
+- **Use Low Mode**: Change to `PERFORMANCE_MODES.LOW` in `electronConfig.js`
 - Reduce camera resolution in `systemConfig.js`
 - Close other resource-intensive applications
 - Disable visualization overlay for better performance
+- **See [PERFORMANCE_GUIDE.md](PERFORMANCE_GUIDE.md) for detailed optimization**
 
 ### MediaPipe Model Loading Failed
 - Check internet connection (online mode)

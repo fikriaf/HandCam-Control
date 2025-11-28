@@ -59,10 +59,19 @@ export class HandDetector {
     const currentTime = performance.now();
     const deltaTime = currentTime - this.lastFrameTime;
 
-    // Frame skipping logic
+    // Frame skipping logic with performance check
     if (deltaTime >= this.frameInterval) {
+      const processingStart = performance.now();
       this.processFrame(currentTime);
-      this.lastFrameTime = currentTime;
+      const processingTime = performance.now() - processingStart;
+      
+      // Adaptive frame skipping if processing is slow
+      if (processingTime > this.frameInterval * 1.5) {
+        // Skip next frame if processing took too long
+        this.lastFrameTime = currentTime + this.frameInterval;
+      } else {
+        this.lastFrameTime = currentTime;
+      }
     }
 
     // Continue loop

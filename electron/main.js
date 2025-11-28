@@ -1,6 +1,13 @@
 // Electron main process
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, session } = require('electron');
 const path = require('path');
+
+// Disable GPU acceleration - required for systems without proper GPU support
+app.disableHardwareAcceleration();
+
+// Optimize for CPU rendering
+app.commandLine.appendSwitch('disable-software-rasterizer');
+app.commandLine.appendSwitch('disable-gpu-compositing');
 
 let mainWindow = null;
 
@@ -12,19 +19,35 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
-      enableRemoteModule: false
+      enableRemoteModule: false,
+      webSecurity: true
     },
     title: 'Hand Gesture Control',
     icon: path.join(__dirname, '../assets/icon.png')
   });
 
-  // Load the app
-  mainWindow.loadFile(path.join(__dirname, '../src/index.html'));
+  // Grant camera permissions
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
+    if (permission === 'media') {
+      callback(true); // Grant camera permission
+    } else {
+      callback(false);
+    }
+  });
+
+  // Load the app from dist folder (after webpack build)
+  const indexPath = path.join(__dirname, '../dist/index.html');
+  mainWindow.loadFile(indexPath);
 
   // Open DevTools in development
   if (process.env.NODE_ENV === 'development') {
     mainWindow.webContents.openDevTools();
   }
+
+  // Log any errors
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    console.error('Failed to load:', errorDescription);
+  });
 
   mainWindow.on('closed', () => {
     mainWindow = null;

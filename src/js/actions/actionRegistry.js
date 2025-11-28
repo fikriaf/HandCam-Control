@@ -25,6 +25,32 @@ function logToUI(message, type = 'gesture') {
   }
 }
 
+/**
+ * Helper function to simulate keyboard key press
+ * @param {string} key - Key to press (e.g., 'ArrowRight', ' ', 'Escape')
+ */
+function simulateKeyPress(key) {
+  // Dispatch keydown event
+  const keydownEvent = new KeyboardEvent('keydown', {
+    key: key,
+    code: key,
+    bubbles: true,
+    cancelable: true
+  });
+  document.dispatchEvent(keydownEvent);
+  
+  // Dispatch keyup event
+  setTimeout(() => {
+    const keyupEvent = new KeyboardEvent('keyup', {
+      key: key,
+      code: key,
+      bubbles: true,
+      cancelable: true
+    });
+    document.dispatchEvent(keyupEvent);
+  }, 100);
+}
+
 // ============================================================================
 // SWIPE GESTURES
 // ============================================================================
@@ -37,9 +63,11 @@ export function onSwipeLeft(data) {
   console.log('Swipe Left detected:', data);
   logToUI(`Swipe Left → Next slide (${data.handedness} hand)`, 'gesture');
   
-  // TODO: Implement your custom action here
-  // Example: Navigate to next slide in presentation
-  // window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+  // Simulate Arrow Right key press (for presentations, PDFs, etc)
+  simulateKeyPress('ArrowRight');
+  
+  // Also try to navigate forward in browser
+  // window.history.forward();
 }
 
 /**
@@ -50,9 +78,11 @@ export function onSwipeRight(data) {
   console.log('Swipe Right detected:', data);
   logToUI(`Swipe Right → Previous slide (${data.handedness} hand)`, 'gesture');
   
-  // TODO: Implement your custom action here
-  // Example: Navigate to previous slide in presentation
-  // window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+  // Simulate Arrow Left key press
+  simulateKeyPress('ArrowLeft');
+  
+  // Also try to navigate back in browser
+  // window.history.back();
 }
 
 /**
@@ -63,9 +93,14 @@ export function onSwipeUp(data) {
   console.log('Swipe Up detected:', data);
   logToUI(`Swipe Up → Scroll up (${data.handedness} hand)`, 'gesture');
   
-  // TODO: Implement your custom action here
-  // Example: Scroll page up
-  // window.scrollBy({ top: -200, behavior: 'smooth' });
+  // Scroll page up
+  window.scrollBy({ top: -300, behavior: 'smooth' });
+  
+  // Also try to increase volume if video exists
+  const video = document.querySelector('video');
+  if (video) {
+    video.volume = Math.min(1, video.volume + 0.1);
+  }
 }
 
 /**
@@ -76,9 +111,14 @@ export function onSwipeDown(data) {
   console.log('Swipe Down detected:', data);
   logToUI(`Swipe Down → Scroll down (${data.handedness} hand)`, 'gesture');
   
-  // TODO: Implement your custom action here
-  // Example: Scroll page down
-  // window.scrollBy({ top: 200, behavior: 'smooth' });
+  // Scroll page down
+  window.scrollBy({ top: 300, behavior: 'smooth' });
+  
+  // Also try to decrease volume if video exists
+  const video = document.querySelector('video');
+  if (video) {
+    video.volume = Math.max(0, video.volume - 0.1);
+  }
 }
 
 // ============================================================================
@@ -86,17 +126,27 @@ export function onSwipeDown(data) {
 // ============================================================================
 
 /**
- * Push Forward - Simulate mouse click
+ * Push Forward - Play/Pause video or simulate Space key
  * @param {Object} data - Gesture data
  */
 export function onPushForward(data) {
   console.log('Push Forward detected:', data);
-  logToUI(`Push Forward → Click (${data.handedness} hand)`, 'gesture');
+  logToUI(`Push Forward → Play/Pause (${data.handedness} hand)`, 'gesture');
   
-  // TODO: Implement your custom action here
-  // Example: Simulate click at current cursor position
-  // const event = new MouseEvent('click', { bubbles: true, cancelable: true });
-  // document.elementFromPoint(x, y)?.dispatchEvent(event);
+  // Try to play/pause video
+  const video = document.querySelector('video');
+  if (video) {
+    if (video.paused) {
+      video.play();
+      logToUI('▶️ Video playing', 'gesture');
+    } else {
+      video.pause();
+      logToUI('⏸️ Video paused', 'gesture');
+    }
+  } else {
+    // Simulate Space key (works for many media players)
+    simulateKeyPress(' ');
+  }
 }
 
 // ============================================================================
@@ -174,28 +224,51 @@ export function onOKGesture(data) {
 }
 
 /**
- * Peace Gesture - Take screenshot
+ * Peace Gesture - Fullscreen toggle
  * @param {Object} data - Gesture data
  */
 export function onPeaceGesture(data) {
   console.log('Peace Gesture detected:', data);
-  logToUI(`Peace Gesture → Screenshot (${data.handedness} hand)`, 'gesture');
+  logToUI(`Peace Gesture → Fullscreen (${data.handedness} hand)`, 'gesture');
   
-  // TODO: Implement your custom action here
-  // Example: Trigger screenshot functionality
-  // Note: Browser security restrictions may limit this
+  // Toggle fullscreen
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(err => {
+      console.log('Fullscreen error:', err);
+    });
+    logToUI('🖥️ Entering fullscreen', 'gesture');
+  } else {
+    document.exitFullscreen();
+    logToUI('🖥️ Exiting fullscreen', 'gesture');
+  }
 }
 
 /**
- * Open Palm Gesture - Stop/Pause
+ * Open Palm Gesture - Stop/Pause all media
  * @param {Object} data - Gesture data
  */
 export function onOpenPalmGesture(data) {
   console.log('Open Palm Gesture detected:', data);
-  logToUI(`Open Palm → Stop/Pause (${data.handedness} hand)`, 'gesture');
+  logToUI(`Open Palm → Stop All Media (${data.handedness} hand)`, 'gesture');
   
-  // TODO: Implement your custom action here
-  // Example: Pause media playback or freeze input
+  // Pause all videos
+  const videos = document.querySelectorAll('video');
+  videos.forEach(video => {
+    video.pause();
+  });
+  
+  // Pause all audios
+  const audios = document.querySelectorAll('audio');
+  audios.forEach(audio => {
+    audio.pause();
+  });
+  
+  if (videos.length > 0 || audios.length > 0) {
+    logToUI('⏹️ All media stopped', 'gesture');
+  } else {
+    // Simulate Escape key
+    simulateKeyPress('Escape');
+  }
 }
 
 // ============================================================================
